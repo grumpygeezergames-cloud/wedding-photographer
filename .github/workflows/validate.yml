@@ -15,10 +15,10 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
-          p = Path("index.html")
-          assert p.is_file(), "Missing index.html: upload the playable game to the repository root."
+          p = Path("Index.html")
+          assert p.is_file(), "Missing Index.html: upload the playable game to the repository root."
           s = p.read_text(encoding="utf-8")
-          assert "<html" in s.lower(), "index.html is not HTML"
+          assert "<html" in s.lower(), "Index.html is not HTML"
           assert "start" in s.lower(), "Game start UI missing"
           print("Game entry point exists.")
           PY
@@ -36,7 +36,7 @@ jobs:
                   if tag == 'script': self.inside=False
               def handle_data(self, data):
                   if self.inside and data.strip(): self.items.append(data)
-          p=Scripts(); p.feed(Path('index.html').read_text(encoding='utf-8'))
+          p=Scripts(); p.feed(Path('Index.html').read_text(encoding='utf-8'))
           Path('/tmp/game-scripts.js').write_text('\n'.join(p.items),encoding='utf-8')
           PY
           node --check /tmp/game-scripts.js
