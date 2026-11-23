@@ -10,7 +10,7 @@ html,body{margin:0;overflow-x:hidden;background:#241c2b}
 .top{padding:5px 12px;background:#241c2b;color:#fff}
 .top h1{font-size:16px;margin:2px 0}
 .top small{font-size:11px;color:#e6d6e5}
-.top #newBtn{font-size:11px;padding:7px 10px}
+.top #newBtn{display:none}
 .panel{margin:0;border-radius:0;box-shadow:none;padding:0;background:#241c2b}
 .panel:has(.stage){position:relative}
 .panel:has(.stage)>.controls{display:none}
@@ -21,10 +21,10 @@ html,body{margin:0;overflow-x:hidden;background:#241c2b}
 .stage .hud strong{font-size:12px;text-shadow:0 1px 3px #000}
 .stage .hud .hint{color:white;font-size:11px;text-shadow:0 1px 3px #000}
 .stage .bottom{position:absolute;left:0;right:0;bottom:0;z-index:4;display:flex;align-items:flex-end;justify-content:center;gap:12px;margin:0;padding:20px 12px 8px;background:linear-gradient(transparent,#20152788);pointer-events:none}
-.stage .bottom>*{pointer-events:auto}
+.stage .bottom>*{display:none!important}
 .stage .bottom>.controls{display:none}
 .stage .shutter{width:66px;height:66px;flex:none;box-shadow:0 2px 8px #0006}
-.stage #next{position:absolute;right:10px;bottom:12px;max-width:34%;padding:9px 10px;font-size:11px;line-height:1.1}
+.stage #next{display:none;position:absolute;right:10px;bottom:12px;max-width:34%;padding:9px 10px;font-size:11px;line-height:1.1}
 .legend,.footer{display:none}
 .panel:has(.photo-strip){background:#fff;padding:9px 12px}
 .viewfinder{width:46%;height:69%}
@@ -58,6 +58,18 @@ js = """
 </script>
 """
 assert "</head>" in html and "</body>" in html
+# Replace double-tap-to-shoot with single tap/click, while preserving drag-to-aim.
+old = """  if(e.pointerType!=='mouse'&&!dragMoved){
+    const now=performance.now();
+    if(now-lastTap<350&&Math.hypot(e.clientX-lastTapX,e.clientY-lastTapY)<45){take();lastTap=0;}
+    else {lastTap=now;lastTapX=e.clientX;lastTapY=e.clientY;}
+  }"""
+new = """  if(!dragMoved && (e.pointerType!=='mouse'||e.button===0))take();"""
+assert old in html, "Could not locate existing tap handler"
+html=html.replace(old,new,1)
+old_double = """$('stage').addEventListener('dblclick',e=>{e.preventDefault();take()});"""
+assert old_double in html, "Could not locate double-click handler"
+html=html.replace(old_double,"",1)
 html=html.replace("</head>",style+"</head>",1)
 html=html.replace("</body>",js+"</body>",1)
 out=Path("site")
