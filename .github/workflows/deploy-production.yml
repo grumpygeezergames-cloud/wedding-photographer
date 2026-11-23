@@ -1,0 +1,32 @@
+name: Deploy production (manual approval only)
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: 'Type PUBLISH after testing the game'
+        required: true
+        type: string
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: wedding-photographer-pages-production
+  cancel-in-progress: false
+jobs:
+  production:
+    if: ${{ github.ref == 'refs/heads/main' && inputs.confirmation == 'PUBLISH' }}
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require playable game
+        run: test -s index.html
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+      - id: deployment
+        uses: actions/deploy-pages@v4
