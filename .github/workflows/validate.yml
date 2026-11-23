@@ -1,0 +1,42 @@
+name: Validate game
+on:
+  pull_request:
+  push:
+    branches: [main]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check game entry point
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path("index.html")
+          assert p.is_file(), "Missing index.html: upload the playable game to the repository root."
+          s = p.read_text(encoding="utf-8")
+          assert "<html" in s.lower(), "index.html is not HTML"
+          assert "start" in s.lower(), "Game start UI missing"
+          print("Game entry point exists.")
+          PY
+      - name: Check embedded JavaScript syntax
+        run: |
+          python3 - <<'PY'
+          from html.parser import HTMLParser
+          from pathlib import Path
+          class Scripts(HTMLParser):
+              def __init__(self):
+                  super().__init__(); self.items=[]; self.inside=False
+              def handle_starttag(self, tag, attrs):
+                  if tag == 'script' and not dict(attrs).get('src'): self.inside=True
+              def handle_endtag(self, tag):
+                  if tag == 'script': self.inside=False
+              def handle_data(self, data):
+                  if self.inside and data.strip(): self.items.append(data)
+          p=Scripts(); p.feed(Path('index.html').read_text(encoding='utf-8'))
+          Path('/tmp/game-scripts.js').write_text('\n'.join(p.items),encoding='utf-8')
+          PY
+          node --check /tmp/game-scripts.js
