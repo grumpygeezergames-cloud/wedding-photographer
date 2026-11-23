@@ -10,10 +10,12 @@ jobs:
       - uses: actions/checkout@v4
       - name: Require playable game
         run: test -s Index.html
+      - name: Build mobile game
+        run: python3 scripts/build-mobile.py
       - name: Prepare preview artifact
         run: |
           mkdir -p preview
-          cp Index.html preview/index.html
+          cp site/index.html preview/index.html
           if [ -d assets ]; then cp -R assets preview/assets; fi
       - uses: actions/upload-artifact@v4
         with:
