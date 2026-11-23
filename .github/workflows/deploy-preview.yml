@@ -1,0 +1,22 @@
+name: Deploy preview (manual)
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  preview:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Require playable game
+        run: test -s index.html
+      - name: Prepare preview artifact
+        run: |
+          mkdir -p preview
+          cp index.html preview/index.html
+          if [ -d assets ]; then cp -R assets preview/assets; fi
+      - uses: actions/upload-artifact@v4
+        with:
+          name: wedding-photographer-preview
+          path: preview/
+          retention-days: 14
