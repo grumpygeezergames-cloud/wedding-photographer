@@ -13,7 +13,7 @@ jobs:
       - name: Prepare preview artifact
         run: |
           mkdir -p preview
-          cp Index.html preview/Index.html
+          cp Index.html preview/index.html
           if [ -d assets ]; then cp -R assets preview/assets; fi
       - uses: actions/upload-artifact@v4
         with:
