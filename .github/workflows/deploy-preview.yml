@@ -9,11 +9,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Require playable game
-        run: test -s index.html
+        run: test -s Index.html
       - name: Prepare preview artifact
         run: |
           mkdir -p preview
-          cp index.html preview/index.html
+          cp Index.html preview/Index.html
           if [ -d assets ]; then cp -R assets preview/assets; fi
       - uses: actions/upload-artifact@v4
         with:
